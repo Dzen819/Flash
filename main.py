@@ -2,8 +2,11 @@ from tkinter import *
 import pandas
 import random
 BACKGROUND_COLOR = "#B1DDC6"
+try:
+    words_frame = pandas.read_csv("./data/words_to_learn.csv")
+except FileNotFoundError:
+    words_frame = pandas.read_csv("./data/words.csv")
 
-words_frame = pandas.read_csv("./data/words.csv")
 words_dict = words_frame.to_dict(orient="records")
 current_word = {}
 
@@ -16,10 +19,18 @@ def random_word():
     canvas.itemconfigure(title, text="English", fill="black")
     canvas.itemconfigure(background_img, image=card_front_img)
     flip_timer = window.after(3000, func=flip_card)
+
 def flip_card():
     canvas.itemconfigure(en_text, text=current_word["Russian"], fill="white")
     canvas.itemconfigure(title, text="Russian", fill="white")
     canvas.itemconfigure(background_img, image=card_back_img)
+def yes():
+    words_dict.remove(current_word)
+    new_words = pandas.DataFrame(words_dict)
+    new_words.to_csv("data/words_to_learn.csv", index=False)
+    random_word()
+def no():
+    random_word()
 
 #------------------------------------WINDOW---------------------------------------#
 window = Tk()
@@ -37,8 +48,8 @@ canvas.grid(column=0, row=0, columnspan=2)
 #------------------------------------BUTTONS---------------------------------------#
 yes_img = PhotoImage(file="./images/right.png")
 no_img = PhotoImage(file="./images/wrong.png")
-yes_button = Button(image=yes_img, highlightthickness=0, command=random_word)
-no_button = Button(image=no_img, highlightthickness=0, command=random_word)
+yes_button = Button(image=yes_img, highlightthickness=0, command=yes)
+no_button = Button(image=no_img, highlightthickness=0, command=no)
 yes_button.grid(column=0, row=1)
 no_button.grid(column=1, row=1)
 
